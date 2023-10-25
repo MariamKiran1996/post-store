@@ -18,10 +18,29 @@ const Login =()=> {
     password:'',
   })
 
-  const submitForm =(values)=>{
-    toast.success("Login Error");
-    
-    console.log("parent function", formData, values);
+  const submitForm =async(values)=>{
+   try{
+      const response = await fetch('http://localhost:3000/api/login',{
+        method:'POST',
+        headers: new Headers({
+           'content-type':'application/json'
+        }),
+        body: JSON.stringify(values)
+
+      })
+      const data = await response.json();
+      if(data.error){
+        toast.error(data.error)
+      }
+      if(data.token){
+        toast.success('Login Success');
+      }
+
+   }
+   catch(error){
+    console.log('error', error);
+    toast.error('Login error, Try again')
+   }
 
   }
 

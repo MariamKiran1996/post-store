@@ -25,11 +25,7 @@ const Signup=()=> {
     // confirmPassword:''
   })
 
-  const submitForm =async (values)=>{
-    
-    
-    
-    
+  const submitForm =async (values)=>{  
     try{
       const response =await fetch('http://localhost:3000/api/signup',{
         method: 'POST',
@@ -50,7 +46,7 @@ const Signup=()=> {
     }
     catch(error){
       console.log("error", error)
-      toast.error("Signup Error",);
+      toast.error("Signup Error, Try again",);
 
     }
 
