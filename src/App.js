@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, {useEffect, useState} from "react";
 import {useRoutes} from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
@@ -11,6 +11,13 @@ import Signup from './pages/authentication/signup'
 import ForgotPassword from "./pages/authentication/forgot-password";
 
 function App() {
+  const [session, setSession]= useState('');
+
+  useEffect=(()=>{
+      let token=sessionStorage.getItem('token');
+      setSession(token);
+  }, []);
+
   let element = useRoutes([
     { path:'/', element:<Login />},
     { path:'/signup', element:<Signup />},
@@ -18,7 +25,6 @@ function App() {
   ])
   return (
     <>
-    
     <ToastContainer />
     { element}
     </>

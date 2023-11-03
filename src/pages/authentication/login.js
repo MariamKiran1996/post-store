@@ -4,6 +4,8 @@ import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 import Input from '../../components/input';
 import { toast } from 'react-toastify';
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "react-facebook-login";
 
 const LoginSchema = Yup.object().shape({
  
@@ -16,6 +18,12 @@ const Login =()=> {
   const [formData, setFormData] = useState({
     email:'',
     password:'',
+  })
+
+  const [userData, setUserData] = useState({
+    token:'',
+    name:'',
+    email:'', 
   })
 
   const submitForm =async(values)=>{
@@ -33,6 +41,7 @@ const Login =()=> {
         toast.error(data.error)
       }
       if(data.token){
+        sessionStorage.setItem("token", data.token);
         toast.success('Login Success');
       }
 
@@ -43,6 +52,29 @@ const Login =()=> {
    }
 
   }
+  const createUser = async (values) => {
+    console.log("values", values, userData);
+    try {
+      const response = await fetch("http://localhost:3000/api/signup", {
+        method: "POST",
+        headers: new Headers({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify(values),
+      });
+      const data = await response.json();
+      if (data.error) {
+        toast.error(data.error);
+      }
+      if (data.message) {
+        toast.success(data.message);
+      }
+      console.log("response", data);
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Signup Error, Try again");
+    }
+  };
 
   const onChange = (event) =>{
    const value = event.target.value;
@@ -51,7 +83,51 @@ const Login =()=> {
     [event.target.name]: value,
    })
 
+
   }
+
+  const googleLogin = useGoogleLogin(
+    {
+      
+    onSuccess: async (tokenResponse) => {
+      let token;
+      if (tokenResponse){
+        token = tokenResponse.access_token;
+        const headers = {'Authorization': `Bearer ${token}`};
+        const response =await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers});
+        const data = await response.json();
+        console.log(data,response, 'data');
+        let userData ={token:'', name:'', email:''}
+        if(data){
+         
+          userData.token=token;
+          userData.name= data.name;
+          userData.email= data.email;
+         
+        }
+        createUser(userData);
+       
+
+      }
+      console.log(tokenResponse, token);
+    },
+    onError: () => {
+      console.log("Login Failed");
+    },
+  }
+  );
+
+  const facebookLogin = (response) => {
+    let userData ={token:'', name:'', email:''}
+    if(response){
+     
+      userData.token=response.accessToken;
+      userData.name= response.name;
+      userData.email= response.email;
+     
+    }
+    createUser(userData);
+  };
 
 
   return (
@@ -120,8 +196,18 @@ const Login =()=> {
             <span className="span-or">or</span>
           </div>
          
-          <div  className="social-login mb-3"><span >Login with</span><a  href="#" className="facebook"><i  className="fab fa-facebook-f"></i></a>
-            <a  href="#" className="google"><i  className="fab fa-google"></i></a>
+          <div  className="social-login mb-3"><span >Login with</span>
+          <FacebookLogin
+                  appId="1074424366816262"
+                  autoLoad={true}
+                  fields="name,email,picture"
+                  callback={facebookLogin}
+                  cssClass="facebook"
+                  icon={<i className="fab fa-facebook-f"></i>}
+                  textButton={""}
+                  
+                />
+            <a  href="#" className="google" onClick={() => googleLogin()}><i  className="fab fa-google"></i></a>
             <a  href="#" className="facebook"><i className="fab fa-linkedin"></i></a>
           </div>
         

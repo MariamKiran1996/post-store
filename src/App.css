@@ -105,7 +105,7 @@ button.loginBtn:hover{color:var(--themeBlue);border:1px solid var(--themeBlue);b
 .dont-have a{color:#333;}
 .forgPassMain{padding:60px 20px;}
 .forgPassMain .dont-have{margin-top:1rem;}
-
+.facebook.metro{width: 32px; height: 32px; background: #4b75bd; color: #fff; border-radius: 4px; }
 /* ======     signIn page css end ======= */
 
 /* ======= responsiveness media query starts ============== */
