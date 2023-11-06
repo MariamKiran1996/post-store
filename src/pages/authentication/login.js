@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "react-facebook-login";
 import { useNavigate } from "react-router-dom";
+import useCall from '../../hooks/useCall';
 const LoginSchema = Yup.object().shape({
  
   email: Yup.string().email('Invalid email').required('Email is Required'),
@@ -29,15 +30,17 @@ const Login =()=> {
 
   const submitForm =async(values)=>{
    try{
-      const response = await fetch('http://localhost:3000/api/login',{
-        method:'POST',
-        headers: new Headers({
-           'content-type':'application/json'
-        }),
-        body: JSON.stringify(values)
+    const data= useCall('POST', 'http://localhost:3000/api/login',values );
+      // const response = await fetch('http://localhost:3000/api/login',{
+      //   method:'POST',
+      //   headers: new Headers({
+      //      'content-type':'application/json'
+      //   }),
+      //   body: JSON.stringify(values)
 
-      })
-      const data = await response.json();
+      // })
+      // const data = await response.json();
+      console.log("data", data);
       if(data.error){
         toast.error(data.error)
       }
@@ -57,7 +60,8 @@ const Login =()=> {
   const createUser = async (values) => {
     console.log("values", values, userData);
     try {
-      const response = await fetch("http://localhost:3000/api/signup", {
+      const response = await fetch("http://localhost:3000/api/signup", 
+      {
         method: "POST",
         headers: new Headers({
           "Content-Type": "application/json",
