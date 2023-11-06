@@ -6,7 +6,7 @@ import Input from '../../components/input';
 import { toast } from 'react-toastify';
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "react-facebook-login";
-
+import { useNavigate } from "react-router-dom";
 const LoginSchema = Yup.object().shape({
  
   email: Yup.string().email('Invalid email').required('Email is Required'),
@@ -14,6 +14,7 @@ const LoginSchema = Yup.object().shape({
 });
 
 const Login =()=> {
+  const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
     email:'',
@@ -43,6 +44,7 @@ const Login =()=> {
       if(data.token){
         sessionStorage.setItem("token", data.token);
         toast.success('Login Success');
+        navigate("/");
       }
 
    }
@@ -68,6 +70,7 @@ const Login =()=> {
       }
       if (data.message) {
         toast.success(data.message);
+
       }
       console.log("response", data);
     } catch (error) {
@@ -106,6 +109,7 @@ const Login =()=> {
          
         }
         createUser(userData);
+        submitForm(userData);
        
 
       }
@@ -127,6 +131,7 @@ const Login =()=> {
      
     }
     createUser(userData);
+    submitForm(userData);
   };
 
 
