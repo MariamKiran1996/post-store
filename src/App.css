@@ -2226,6 +2226,12 @@ text.highcharts-credits {
     display: flex;
     column-gap: 15px;
 }
+.loader{
+width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: #0000004a;}
 /* calendar css  */
 
 /* calendar css end */

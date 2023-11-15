@@ -1,6 +1,14 @@
 import React from 'react'
+import { useNavigate } from "react-router-dom";
 
-const adminHome=()=> {
+const AdminHome=()=>{
+  const navigate = useNavigate();
+  
+  const logout=()=>{
+    sessionStorage.removeItem("token");
+    navigate('/');
+  }
+
   return (
     <div id="wrapper">
     <header class="homeHeader">
@@ -129,6 +137,7 @@ const adminHome=()=> {
             <a href="../wishList.html" class="ml-3"
               ><i class="far fa-heart"></i
             ></a>
+            <a href='javescript:void(0)' style={{color:'#fff'}} onClick={logout}>Logout</a>
           </form>
         </div>
       </nav>
@@ -311,4 +320,4 @@ const adminHome=()=> {
   )
 }
 
-export default adminHome;
+export default AdminHome;

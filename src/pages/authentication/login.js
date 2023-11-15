@@ -8,6 +8,7 @@ import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "react-facebook-login";
 import { useNavigate } from "react-router-dom";
 import useCall from '../../hooks/useCall';
+import { Circles } from 'react-loader-spinner'
 const LoginSchema = Yup.object().shape({
  
   email: Yup.string().email('Invalid email').required('Email is Required'),
@@ -16,71 +17,60 @@ const LoginSchema = Yup.object().shape({
 
 const Login =()=> {
   const navigate = useNavigate();
+  const {apiCall} = useCall();
+  const [loader, setLoader] = useState(false);
   
   const [formData, setFormData] = useState({
     email:'',
     password:'',
   })
 
-  const [userData, setUserData] = useState({
-    token:'',
-    name:'',
-    email:'', 
-  })
+  // const [userData, setUserData] = useState({
+  //   token:'',
+  //   name:'',
+  //   email:'', 
+  // })
 
   const submitForm =async(values)=>{
-   try{
-    const data= useCall('POST', 'http://localhost:3000/api/login',values );
-      // const response = await fetch('http://localhost:3000/api/login',{
-      //   method:'POST',
-      //   headers: new Headers({
-      //      'content-type':'application/json'
-      //   }),
-      //   body: JSON.stringify(values)
-
-      // })
-      // const data = await response.json();
-      console.log("data", data);
-      if(data.error){
+    setLoader(true);
+   
+    const data=await apiCall('POST', 'http://localhost:3000/api/login',values);
+    console.log("submit data", data);
+      if(!data.success){
         toast.error(data.error)
       }
-      if(data.token){
-        sessionStorage.setItem("token", data.token);
+      if(data.responseValue.token){
+        sessionStorage.setItem("token", data.responseValue.token);
+        setLoader(false);
         toast.success('Login Success');
         navigate("/");
       }
 
-   }
-   catch(error){
-    console.log('error', error);
-    toast.error('Login error, Try again')
-   }
+  
 
   }
   const createUser = async (values) => {
-    console.log("values", values, userData);
-    try {
-      const response = await fetch("http://localhost:3000/api/signup", 
-      {
-        method: "POST",
-        headers: new Headers({
-          "Content-Type": "application/json",
-        }),
-        body: JSON.stringify(values),
-      });
-      const data = await response.json();
-      if (data.error) {
+    
+    const data = await apiCall('POST', 'http://localhost:3000/api/signup', values);
+   
+      if (!data.success) {
+        
         toast.error(data.error);
       }
-      if (data.message) {
-        toast.success(data.message);
-
+      else{
+      
+        if(data.responseValue.error)
+        { 
+             toast(data.responseValue.error);
+        }
+        submitForm(values)
       }
-      console.log("response", data);
-    } catch (error) {
-      console.log("error", error);
-      toast.error("Signup Error, Try again");
-    }
+      // setLoader(false);
+      // if (data.message) {
+      //   toast.success(data.message);
+
+      // }
+    
   };
 
   const onChange = (event) =>{
@@ -95,29 +85,40 @@ const Login =()=> {
 
   const googleLogin = useGoogleLogin(
     {
+     
       
     onSuccess: async (tokenResponse) => {
+      setLoader(true);
       let token;
-      if (tokenResponse){
-        token = tokenResponse.access_token;
-        const headers = {'Authorization': `Bearer ${token}`};
-        const response =await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers});
-        const data = await response.json();
-        console.log(data,response, 'data');
+      // if (tokenResponse){
+        const data = await apiCall('GET','https://www.googleapis.com/oauth2/v3/userinfo', null,  tokenResponse.access_token)
+
+
+        // token = tokenResponse.access_token;
+        // const headers = {'Authorization': `Bearer ${token}`};
+        // const response =await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers});
+        // const data = await response.json();
+        console.log(data, 'data google');
         let userData ={token:'', name:'', email:''}
+        
         if(data){
          
-          userData.token=token;
-          userData.name= data.name;
-          userData.email= data.email;
+          userData.token=tokenResponse.access_token;
+          userData.name= data.responseValue.name;
+          userData.email= data.responseValue.email;
+          createUser(userData);
          
         }
-        createUser(userData);
-        submitForm(userData);
+        else if(!data.responseValue || !data.success ){
+          toast.error("Error logging in");
+
+        }
+       
+        // submitForm(userData);
        
 
-      }
-      console.log(tokenResponse, token);
+      // }
+      // console.log(tokenResponse, token);
     },
     onError: () => {
       console.log("Login Failed");
@@ -135,11 +136,22 @@ const Login =()=> {
      
     }
     createUser(userData);
-    submitForm(userData);
+    // submitForm(userData);
   };
 
 
   return (
+    <>
+    {loader? <Circles
+      height="80"
+      width="80"
+      radius="9"
+      color="green"
+      ariaLabel="loading"
+      wrapperStyle
+      wrapperClass="loader"
+    />
+    :
     <div id="wrapper">
     <section className="signIn pt-4">
       
@@ -231,6 +243,8 @@ const Login =()=> {
     </section>
    
   </div>
+             }
+             </>
   )
   
 }
